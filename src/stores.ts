@@ -26,3 +26,5 @@ export const counter: Writable<TiministCounter[]> = writable(storedCounter);
 counter.subscribe((value) => {
   localStorage.setItem("counter", JSON.stringify(value));
 });
+
+export const modal = writable(null);
