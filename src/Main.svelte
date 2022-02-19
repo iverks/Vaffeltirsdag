@@ -184,6 +184,10 @@
   };
 </script>
 
+<svelte:head>
+  <title>Vaffeltirsdag</title>
+</svelte:head>
+
 <div id="penis" style="display: none; position: absolute; top: 0; left: 0;">
   <img src="penis.jpg" alt="penis" width="33%" />
 </div>
