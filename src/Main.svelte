@@ -136,7 +136,7 @@
 
   function increment(tiministid: number): void {
     const idx = $counter.findIndex((timinist) => timinist.id == tiministid);
-    if (idx && $counter[idx]) {
+    if (idx != -1 && $counter[idx]) {
       $counter[idx].vaffelcount += 1;
       $counter = $counter;
     }
@@ -144,7 +144,7 @@
 
   function decrement(tiministid: number): void {
     const idx = $counter.findIndex((timinist) => timinist.id == tiministid);
-    if (idx && $counter[idx].vaffelcount > 0) {
+    if (idx != -1 && $counter[idx].vaffelcount > 0) {
       $counter[idx].vaffelcount -= 1;
       $counter = $counter;
     }
@@ -224,20 +224,21 @@
     <div class="column">
       <h2>Første-kø</h2>
       {#each $forsteko.filter((t) => t.erIKo) as timinist (timinist.id)}
-        <label animate:flip>
+        <div class="label" animate:flip>
           {timinist.navn}
           <button
             class="delete"
             on:click={() => skipById(timinist.id, "forste")}>x</button
           >
-        </label>
+        </div>
       {/each}
     </div>
 
     <div class="column">
       <h2>Nte-kø</h2>
       {#each $nteko as timinist (timinist.id)}
-        <label
+        <div
+          class="label"
           in:receive={{ key: timinist.id }}
           out:send={{ key: timinist.id }}
           animate:flip
@@ -246,14 +247,15 @@
           <button class="delete" on:click={() => skipById(timinist.id, "nte")}
             >x</button
           >
-        </label>
+        </div>
       {/each}
     </div>
 
     <div class="column">
       <h2>Opptelling</h2>
       {#each $counter as timinist (timinist.id)}
-        <label
+        <div
+          class="label"
           in:receive={{ key: timinist.id }}
           out:send={{ key: timinist.id }}
           animate:flip
@@ -265,7 +267,7 @@
           <button class="decrement" on:click={() => decrement(timinist.id)}
             >-</button
           >
-        </label>
+        </div>
       {/each}
     </div>
   </div>
@@ -317,7 +319,7 @@
     font-weight: 200;
   }
 
-  label {
+  .label {
     top: 0;
     left: 0;
     display: block;
@@ -359,7 +361,7 @@
     transition: opacity 0.2s;
   }
 
-  label:hover button {
+  .label:hover button {
     opacity: 1;
   }
 </style>
