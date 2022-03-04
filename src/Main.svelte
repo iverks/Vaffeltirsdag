@@ -211,13 +211,13 @@
   <div class="input-wrapper">
     <input
       class="new-timinist"
-      placeholder="navn eller en av next, skip, reset, import, export"
+      placeholder="<navn> eller en av next, skip, reset, import, export"
       style={"transform: translate3d(" + $transformed + "px, 0, 0)"}
       on:keydown={(event) =>
         event.key === "Enter" && handleInput(event.currentTarget)}
     />
-    <button on:click={showImport} class="import"> import </button>
-    <button on:click={showExport} class="export"> export </button>
+    <button on:click={showImport} class="Import"> import </button>
+    <button on:click={showExport} class="Export"> export </button>
   </div>
 
   <div class="column-wrapper">
@@ -329,6 +329,7 @@
     margin: 0 auto 0.5em auto;
     border-radius: 2px;
     background-color: #eee;
+    text-transform: capitalize;
   }
 
   input {
