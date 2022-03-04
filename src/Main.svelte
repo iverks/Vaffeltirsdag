@@ -217,7 +217,7 @@
         event.key === "Enter" && handleInput(event.currentTarget)}
     />
     <button on:click={showImport} class="import"> Import </button>
-    <button on:click={showExport} class="Export"> Export </button>
+    <button on:click={showExport} class="export"> Export </button>
   </div>
 
   <div class="column-wrapper">
