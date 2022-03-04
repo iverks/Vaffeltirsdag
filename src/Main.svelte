@@ -216,8 +216,8 @@
       on:keydown={(event) =>
         event.key === "Enter" && handleInput(event.currentTarget)}
     />
-    <button on:click={showImport} class="Import"> import </button>
-    <button on:click={showExport} class="Export"> export </button>
+    <button on:click={showImport} class="import"> Import </button>
+    <button on:click={showExport} class="Export"> Export </button>
   </div>
 
   <div class="column-wrapper">
