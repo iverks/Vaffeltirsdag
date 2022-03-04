@@ -29,7 +29,7 @@
   <input
     type="text"
     bind:value
-    on:keydown={(e) => e.which === 13 && _onOkay()}
+    on:keydown={(e) => e.key === "Enter" && _onOkay()}
   />
 {/if}
 

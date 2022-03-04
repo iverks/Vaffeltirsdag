@@ -2,7 +2,7 @@ import { quintOut } from "svelte/easing";
 import { crossfade } from "svelte/transition";
 
 export const [send, receive] = crossfade({
-  fallback(node, params) {
+  fallback(node, _) {
     const style = getComputedStyle(node);
     const transform = style.transform === "none" ? "" : style.transform;
     return {

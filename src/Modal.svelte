@@ -1,4 +1,3 @@
-<!-- v1.3.0 -->
 <script context="module">
   /**
    * Create a Svelte component with props bound to it.

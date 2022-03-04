@@ -2,7 +2,7 @@
   import { flip } from "svelte/animate";
   import { send, receive } from "./animations";
   import { tweened } from "svelte/motion";
-  import { forsteko, nteko, counter, modal } from "./stores";
+  import { forsteko, nteko, counter } from "./stores";
   import {
     generateUniqueIdFromString,
     removeSpecialChars,
@@ -63,8 +63,7 @@
       input.value = "";
     } else if (
       $nteko.filter((timinist) => timinist.navn == navn).length == 0 &&
-      $forsteko.filter((timinist) => timinist.navn === navn).at(0).erIKo ===
-        false
+      $forsteko.filter((timinist) => timinist.navn === navn)[0].erIKo === false
     ) {
       $nteko = [...$nteko, { navn: navn, id }];
       input.value = "";
@@ -77,11 +76,11 @@
     let popped: TiministForsteko | TiministNteko;
     if ($forsteko.filter((timinist) => timinist.erIKo).length > 0) {
       const idx = $forsteko.findIndex((timinist) => timinist.erIKo);
-      $forsteko.at(idx).erIKo = false;
-      popped = $forsteko.at(idx);
+      $forsteko[idx].erIKo = false;
+      popped = $forsteko[idx];
       $forsteko = $forsteko;
     } else if ($nteko.length > 0) {
-      popped = $nteko.splice(0, 1).at(0);
+      popped = $nteko.splice(0, 1)[0];
       $nteko = $nteko;
     } else {
       shake();
@@ -97,10 +96,10 @@
   function skip(): boolean {
     if ($forsteko.filter((timinist) => timinist.erIKo).length > 0) {
       const idx = $forsteko.findIndex((timinist) => timinist.erIKo);
-      const name = $forsteko.at(idx).navn;
+      const name = $forsteko[idx].navn;
       $forsteko.splice(idx, 1);
       const countidx = $counter.findIndex((timinist) => timinist.navn == name);
-      $counter.splice(idx, 1);
+      $counter.splice(countidx, 1);
       $forsteko = $forsteko;
       $counter = $counter;
     } else if ($nteko.length > 0) {
@@ -135,6 +134,22 @@
     input.value = "";
   }
 
+  function increment(tiministid: number): void {
+    const idx = $counter.findIndex((timinist) => timinist.id == tiministid);
+    if (idx && $counter[idx]) {
+      $counter[idx].vaffelcount += 1;
+      $counter = $counter;
+    }
+  }
+
+  function decrement(tiministid: number): void {
+    const idx = $counter.findIndex((timinist) => timinist.id == tiministid);
+    if (idx && $counter[idx].vaffelcount > 0) {
+      $counter[idx].vaffelcount -= 1;
+      $counter = $counter;
+    }
+  }
+
   function eksporter(input: HTMLInputElement) {
     const obj = createJSONObject();
     navigator.clipboard.writeText(obj);
@@ -156,7 +171,7 @@
 
   const onCancel = () => {};
 
-  const onOkayImport = (text) => {
+  const onOkayImport = (text: string) => {
     importFromJSONObject(text);
   };
 
@@ -244,8 +259,12 @@
           animate:flip
         >
           {timinist.navn}: {timinist.vaffelcount}
-          <button class="increment" on:click={() => true}>+</button>
-          <button class="decrement" on:click={() => true}>-</button>
+          <button class="increment" on:click={() => increment(timinist.id)}
+            >+</button
+          >
+          <button class="decrement" on:click={() => decrement(timinist.id)}
+            >-</button
+          >
         </label>
       {/each}
     </div>
