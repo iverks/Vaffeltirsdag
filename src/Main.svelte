@@ -216,6 +216,7 @@
       on:keydown={(event) =>
         event.key === "Enter" && handleInput(event.currentTarget)}
     />
+
     <button on:click={showImport} class="import"> Import </button>
     <button on:click={showExport} class="export"> Export </button>
   </div>
@@ -253,7 +254,7 @@
 
     <div class="column">
       <h2>Opptelling</h2>
-      {#each $counter as timinist (timinist.id)}
+      {#each $counter.sort((a, b) => b.vaffelcount - a.vaffelcount) as timinist (timinist.id)}
         <div
           class="label"
           in:receive={{ key: timinist.id }}
@@ -364,5 +365,16 @@
 
   .label:hover button {
     opacity: 1;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .label {
+      background-color: #333;
+    }
+
+    button.delete {
+      color: rgb(200, 30, 30);
+      font-weight: bold;
+    }
   }
 </style>

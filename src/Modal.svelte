@@ -566,4 +566,35 @@
   .close:active {
     outline: none;
   }
+
+  @media (prefers-color-scheme: dark) {
+    .bg {
+      background: rgba(0, 0, 0, 0.33);
+    }
+
+    .window {
+      color: #ccc;
+      background-color: #444;
+    }
+
+    .close {
+      color: #ddd;
+      background: #444;
+      box-shadow: 0 0 0 1px #ddd;
+    }
+
+    .close::before,
+    .close:after {
+      background: #ddd;
+    }
+
+    .close:hover {
+      background: #ddd;
+    }
+
+    .close:hover:before,
+    .close:hover:after {
+      background: #444;
+    }
+  }
 </style>
