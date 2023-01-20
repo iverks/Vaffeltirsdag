@@ -99,8 +99,10 @@
       (element) => !commands.includes(element)
     );
 
-    typeahead = filteredList.at(0).replace(inputValue.toLowerCase(), "");
-    selectedIndex = 0;
+    if (filteredList.length > 0) {
+      selectedIndex = 0;
+      typeahead = filteredList.at(0).replace(inputValue.toLowerCase(), "");
+    }
   };
 
   const handleSubmit = () => {
