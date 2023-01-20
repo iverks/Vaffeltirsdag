@@ -13,8 +13,36 @@
   import Dialog from "./Dialog.svelte";
   import ExportPopup from "./ExportPopup.svelte";
   import { getContext } from "svelte";
+  import AutocompleteListItem from "./AutocompleteListItem.svelte";
 
   const { open } = getContext("simple-modal");
+
+  let inputValue = "";
+
+  // Typeahead is the suggested text that will be appended to the input value
+  let typeahead = "";
+
+  let filteredList = [];
+
+  // To separate the commands from the names, we use additional lists
+  let filteredCommands = [];
+  let filteredNames = [];
+
+  let selectedIndex = null;
+  let inputElement: HTMLInputElement;
+
+  const commands = ["next", "skip", "reset", "export", "import", "penis"];
+
+  // Using reactiveness to remove typeahead after clearing input field and
+  // when there are no matches
+  $: if (!inputValue) {
+    filteredList = [];
+    typeahead = "";
+  }
+
+  $: if (filteredList.length < 1) {
+    typeahead = "";
+  }
 
   const transformed = tweened(0, {
     duration: 100,
@@ -29,50 +57,153 @@
       .then(() => transformed.set(4))
       .then(() => transformed.set(0));
   }
-  function handleInput(input: HTMLInputElement): void {
-    let navn: string = input.value;
-    navn = navn.toLocaleLowerCase();
-    navn = removeSpecialChars(navn);
-    if (["n", "next"].includes(navn)) {
-      next(input);
-    } else if (["s", "skip"].includes(navn)) {
-      if (skip()) {
-        input.value = "";
-      }
-    } else if (["reset"].includes(navn)) {
-      reset(input);
-    } else if (["export"].includes(navn)) {
-      eksporter(input);
-    } else if (["import"].includes(navn)) {
-      importer(input);
-    } else if (["penis"].includes(navn)) {
-      penis(input);
-    } else {
-      add(input);
-    }
-  }
 
-  function add(input: HTMLInputElement): void {
-    let navn: string = input.value;
+  const selectActive = (item: string) => {
+    if (!inputValue) {
+      selectedIndex = filteredCommands.indexOf(item);
+      inputElement.placeholder = "";
+    } else {
+      selectedIndex = filteredList.indexOf(item);
+    }
+    typeahead = item.replace(inputValue.toLowerCase(), "");
+  };
+
+  const handleInput = () => {
+    let storageArray = [];
+    let commandArray = commands;
+    let lowerInputValue = inputValue.toLowerCase();
+
+    if (lowerInputValue) {
+      commandArray = [];
+      commands.forEach((command) => {
+        if (command.startsWith(lowerInputValue)) {
+          storageArray.push(command);
+          commandArray.push(command);
+        }
+      });
+      $forsteko.forEach((person) => {
+        if (person.navn.toLowerCase().startsWith(lowerInputValue)) {
+          storageArray.push(person.navn);
+        }
+      });
+      $nteko.forEach((person) => {
+        if (person.navn.toLowerCase().startsWith(lowerInputValue)) {
+          storageArray.push(person.navn);
+        }
+      });
+    }
+
+    filteredCommands = commandArray;
+    filteredList = [...new Set(storageArray)];
+    filteredNames = filteredList.filter(
+      (element) => !commands.includes(element)
+    );
+
+    typeahead = filteredList.at(0).replace(inputValue.toLowerCase(), "");
+    selectedIndex = 0;
+  };
+
+  const handleSubmit = () => {
+    const command = inputValue.toLowerCase();
+
+    if (!commands.includes(command)) {
+      add();
+      return;
+    }
+
+    if (command == "skip") {
+      if (!skip()) {
+        return;
+      }
+    }
+
+    inputValue = "";
+
+    switch (command) {
+      case "next":
+        next();
+        break;
+      case "reset":
+        reset();
+        break;
+      case "export":
+        eksporter();
+        break;
+      case "import":
+        importer();
+        break;
+      case "penis":
+        penis();
+        break;
+    }
+  };
+
+  const handleClick = (item: string) => {
+    inputValue = item;
+    handleInput();
+    handleSubmit();
+  };
+
+  const handleKeydown = (e: any) => {
+    if (e.key === "Enter") {
+      if (filteredList.length > 0) {
+        inputValue = filteredList.at(selectedIndex);
+        handleInput();
+      }
+      handleSubmit();
+      return;
+    }
+
+    let tabbed = false;
+    if (e.keyCode == 9) {
+      e.preventDefault();
+      if (inputValue != filteredList.at(selectedIndex)) {
+        inputValue = filteredList.at(selectedIndex);
+        handleInput();
+        return;
+      }
+      tabbed = true;
+    }
+
+    if (
+      (e.key === "ArrowDown" || tabbed) &&
+      selectedIndex <= filteredList.length - 1
+    ) {
+      selectedIndex === filteredList.length - 1
+        ? (selectedIndex = 0)
+        : (selectedIndex += 1);
+      return;
+    }
+
+    if (e.key === "ArrowUp" && selectedIndex !== null) {
+      selectedIndex === 0
+        ? (selectedIndex = filteredList.length - 1)
+        : (selectedIndex -= 1);
+      return;
+    }
+  };
+
+  function add(): void {
+    let navn = inputValue;
     navn = navn.toLowerCase();
     navn = removeSpecialChars(navn);
     const id = generateUniqueIdFromString(navn);
     if ($forsteko.filter((timinist) => timinist.navn === navn).length == 0) {
       $counter = [...$counter, { navn: navn, vaffelcount: 0, id }];
       $forsteko = [...$forsteko, { navn: navn, erIKo: true, id }];
-      input.value = "";
+      inputValue = "";
     } else if (
       $nteko.filter((timinist) => timinist.navn == navn).length == 0 &&
       $forsteko.filter((timinist) => timinist.navn === navn)[0].erIKo === false
     ) {
       $nteko = [...$nteko, { navn: navn, id }];
-      input.value = "";
+      inputValue = "";
     } else {
       shake();
     }
   }
 
-  function next(input: HTMLInputElement) {
+  function next() {
     let popped: TiministForsteko | TiministNteko;
     if ($forsteko.filter((timinist) => timinist.erIKo).length > 0) {
       const idx = $forsteko.findIndex((timinist) => timinist.erIKo);
@@ -90,7 +221,7 @@
       $counter.findIndex((timinist) => timinist.navn == popped.navn)
     ).vaffelcount += 1;
     $counter = $counter;
-    input.value = "";
+    inputValue = "";
   }
 
   function skip(): boolean {
@@ -127,11 +258,10 @@
     }
   }
 
-  function reset(input: HTMLInputElement): void {
+  function reset(): void {
     $forsteko = [];
     $nteko = [];
     $counter = [];
-    input.value = "";
   }
 
   function increment(tiministid: number): void {
@@ -150,23 +280,20 @@
     }
   }
 
-  function eksporter(input: HTMLInputElement) {
+  function eksporter() {
     const obj = createJSONObject();
     navigator.clipboard.writeText(obj);
-    input.value = "";
   }
 
-  function importer(input: HTMLInputElement) {
+  function importer() {
     navigator.clipboard.readText().then((obj) => importFromJSONObject(obj));
-    input.value = "";
   }
 
-  function penis(input: HTMLInputElement) {
+  function penis() {
     document.getElementById("penis").style.display =
       document.getElementById("penis").style.display === "none"
         ? "block"
         : "none";
-    input.value = "";
   }
 
   const onCancel = () => {};
@@ -203,23 +330,85 @@
   <title>Vaffeltirsdag</title>
 </svelte:head>
 
+<svelte:window
+  on:keydown={(e) => {
+    if (e.key === "Escape") {
+      filteredCommands = [];
+      filteredNames = [];
+      inputElement.blur();
+    }
+  }}
+  on:click={(e) => {
+    e.stopPropagation();
+    if (e.target != inputElement) {
+      filteredCommands = [];
+      filteredNames = [];
+      inputElement.blur();
+    }
+  }}
+/>
+
 <div id="penis" style="display: none; position: absolute; top: 0; left: 0;">
   <img src="penis.jpg" alt="penis" width="33%" />
 </div>
 
 <div class="board">
   <div class="input-wrapper">
-    <input
-      class="new-timinist"
-      placeholder="<navn> eller en av next, skip, reset, import, export"
+    <div
+      class="relative-wrapper space-x-1"
       style={"transform: translate3d(" + $transformed + "px, 0, 0)"}
-      on:keydown={(event) =>
-        event.key === "Enter" && handleInput(event.currentTarget)}
-    />
-    <button on:click={showImport} class="import"> Import </button>
-    <button on:click={showExport} class="export"> Export </button>
+    >
+      <div class="palette">
+        <span id="input-mirror">{inputValue}</span><span
+          id="typeahead"
+          on:click={() => inputElement.focus()}>{typeahead}</span
+        >
+      </div>
+      <input
+        class="new-timinist"
+        placeholder="<navn> eller en av next, skip, reset, import, export"
+        bind:value={inputValue}
+        bind:this={inputElement}
+        on:input={handleInput}
+        on:focus={handleInput}
+        on:keydown={handleKeydown}
+      />
+      {#if filteredCommands.length > 0 || filteredNames.length > 0}
+        <ul id="autocomplete-items-list">
+          {#if filteredCommands.length > 0}
+            <li class="divider">Commands</li>
+          {/if}
+          {#each filteredCommands as command}
+            <AutocompleteListItem
+              itemLabel={command}
+              highlighted={filteredList.indexOf(command) === selectedIndex ||
+                filteredCommands.indexOf(command) === selectedIndex}
+              handleHover={selectActive}
+              {handleClick}
+            />
+          {/each}
+          {#if filteredNames.length > 0}
+            <li class="divider">Names</li>
+          {/if}
+          {#each filteredNames as name}
+            <AutocompleteListItem
+              capitalized={true}
+              itemLabel={name}
+              highlighted={filteredList.indexOf(name) === selectedIndex}
+              handleHover={selectActive}
+              {handleClick}
+            />
+          {/each}
+        </ul>
+      {/if}
+    </div>
+    <button tabindex="-1" on:click={showImport} class="import space-x-1">
+      Import
+    </button>
+    <button tabindex="-1" on:click={showExport} class="export space-x-1">
+      Export
+    </button>
   </div>
-
   <div class="column-wrapper">
     <div class="column">
       <h2>Første-kø</h2>
@@ -274,27 +463,124 @@
 </div>
 
 <style>
+  /*------- Start input style ----------*/
+  .divider {
+    border-top: 1px solid #bbb;
+    list-style: none;
+    font-weight: bold;
+    color: #999;
+    font-size: 0.8em;
+    padding: 0.5em 0 0.5em 1em;
+    background-color: #fff;
+    margin-top: 0.5em;
+  }
+
+  .palette {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 3em;
+    padding: auto 0;
+    pointer-events: none;
+  }
+
+  #input-mirror {
+    position: relative;
+    visibility: hidden;
+    font-size: 1.4em;
+    display: inline-block;
+    height: 100%;
+    vertical-align: top;
+    z-index: 99;
+    padding: 0.5em 0 0.5em 0.5em;
+    margin: 0;
+    border-left: 1px solid transparent;
+    border-top: 1px solid transparent;
+  }
+
+  #typeahead {
+    position: relative;
+    font-size: 1.4em;
+    z-index: 99;
+    color: #555;
+    display: inline-block;
+    height: 100%;
+    vertical-align: top;
+    padding: 0.5em 0 0.5em 0;
+    margin: 0;
+    border-top: 1px solid transparent;
+  }
+
+  .relative-wrapper {
+    position: relative;
+    flex-grow: 8;
+  }
+
+  .space-x-1 + .space-x-1 {
+    margin-left: 1em;
+  }
+
   .input-wrapper {
     display: flex;
     flex-direction: row;
     height: min-content;
     margin: 2em 0 1em 0;
+    width: 100%;
   }
 
-  .new-timinist {
+  input {
+    margin: 0;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.5em;
+    vertical-align: top;
+    border-radius: 0.5em;
+    outline: none;
     font-size: 1.4em;
-    width: 1fr;
-    flex-grow: 1;
-    margin: auto 0.5em auto 0;
+    border: 1px solid #bbb;
+  }
+
+  input:focus {
+    border-radius: 0.5em 0.5em 0 0;
   }
 
   .import,
   .export {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 2.4em;
+    padding: auto;
     margin: auto 0;
-    flex-grow: 0;
-    height: fit-content;
-    margin: auto 0.1em;
+    flex-grow: 1;
+    background-color: #eee;
+    height: 3.3em;
+    border-radius: 0.5em;
   }
+
+  .import:hover,
+  .export:hover {
+    background-color: #ddd;
+    cursor: pointer;
+  }
+
+  #autocomplete-items-list {
+    position: absolute;
+    z-index: 100000000000;
+    margin: 3em 0 0 0;
+    padding: 0;
+    top: 0;
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #bbb;
+    border-top: none !important;
+    background-color: #fff;
+    padding-bottom: 0.5em;
+    border-radius: 0 0 0.5em 0.5em;
+  }
+
+  /*------- End input style ----------*/
 
   .board {
     max-width: 48em;
@@ -330,10 +616,6 @@
     border-radius: 2px;
     background-color: #eee;
     text-transform: capitalize;
-  }
-
-  input {
-    margin: 0;
   }
 
   button.delete {
