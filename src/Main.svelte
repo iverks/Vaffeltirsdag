@@ -473,7 +473,6 @@
     color: #999;
     font-size: 0.8em;
     padding: 0.5em 0 0.5em 1em;
-    background-color: #fff;
     margin-top: 0.5em;
   }
 
@@ -556,15 +555,8 @@
     padding: auto;
     margin: auto 0;
     flex-grow: 1;
-    background-color: #eee;
     height: 3.3em;
     border-radius: 0.5em;
-  }
-
-  .import:hover,
-  .export:hover {
-    background-color: #ddd;
-    cursor: pointer;
   }
 
   #autocomplete-items-list {
@@ -575,11 +567,16 @@
     top: 0;
     width: 100%;
     box-sizing: border-box;
-    border: 1px solid #bbb;
+    border: 1px solid #ccc;
     border-top: none !important;
     background-color: #fff;
     padding-bottom: 0.5em;
     border-radius: 0 0 0.5em 0.5em;
+  }
+  @media (prefers-color-scheme: dark) {
+    #autocomplete-items-list {
+      background-color: #333;
+    }
   }
 
   /*------- End input style ----------*/

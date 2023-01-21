@@ -26,7 +26,6 @@
     padding: 0.5em;
     margin: 0 0.5em;
     cursor: pointer;
-    background-color: #fff;
   }
 
   .capitalized {
@@ -38,5 +37,12 @@
     background-color: #eee !important;
     color: #333;
     border-radius: 0.5em;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .autocomplete-active {
+      background-color: #444 !important;
+      color: #eee;
+    }
   }
 </style>

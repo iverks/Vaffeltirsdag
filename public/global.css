@@ -67,6 +67,11 @@ button:focus {
   border-color: #666;
 }
 
+button:hover {
+  cursor: pointer;
+  background-color: #ddd;
+}
+
 @media (prefers-color-scheme: dark) {
   body {
     color: #ffffff;
@@ -102,5 +107,9 @@ button:focus {
 
   button:focus {
     border-color: #666;
+  }
+
+  button:hover {
+    background-color: #666;
   }
 }
