@@ -31,7 +31,7 @@
   let selectedIndex = null;
   let inputElement: HTMLInputElement;
 
-  const commands = ["next", "skip", "reset", "export", "import", "penis"];
+  const commands = ["next", "skip", "reset", "export", "import"];
 
   // Using reactiveness to remove typeahead after clearing input field and
   // when there are no matches
@@ -108,15 +108,9 @@
   const handleSubmit = () => {
     const command = inputValue.toLowerCase();
 
-    if (!commands.includes(command)) {
+    if (!commands.includes(command) && command != "penis") {
       add();
       return;
-    }
-
-    if (command == "skip") {
-      if (!skip()) {
-        return;
-      }
     }
 
     inputValue = "";
