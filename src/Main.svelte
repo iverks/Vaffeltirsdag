@@ -114,10 +114,14 @@
     }
 
     inputValue = "";
+    handleInput();
 
     switch (command) {
       case "next":
         next();
+        break;
+      case "skip":
+        skip();
         break;
       case "reset":
         reset();
@@ -188,12 +192,14 @@
       $counter = [...$counter, { navn: navn, vaffelcount: 0, id }];
       $forsteko = [...$forsteko, { navn: navn, erIKo: true, id }];
       inputValue = "";
+      handleInput();
     } else if (
       $nteko.filter((timinist) => timinist.navn == navn).length == 0 &&
       $forsteko.filter((timinist) => timinist.navn === navn)[0].erIKo === false
     ) {
       $nteko = [...$nteko, { navn: navn, id }];
       inputValue = "";
+      handleInput();
     } else {
       shake();
     }
